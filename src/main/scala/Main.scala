@@ -1,8 +1,8 @@
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.{Method, RequestBuilder, Response}
 import com.twitter.io.Buf
-import play.api.libs.json.{JsValue, Json}
 import futureconvertors.FutureConverters._
+import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -14,23 +14,60 @@ class Main extends App {
 
   private val client = Http.newService(s"$host:$port")
 
-  val eventualDashboard = getDashboard("")
+  val eventualResponse = for {
+    eventualDashboard <- getDashboard("")
+    dashboardJson     = Json.parse(eventualDashboard.content.toString)
+    eventualResponse  <- createAndSendSnapshotJson(dashboardJson)
+    json              = Json.parse(eventualResponse.content.toString)
+  } yield json
 
-  val dashboardjson = eventualDashboard.onComplete {
-    case Success(res) => Json.parse(res.content.toString) //todo what does this actually do to the buffer?
-    case Failure(ex) => sendMail("nope")
+  eventualResponse.onComplete {
+    case Success(rjson) =>
+      sendUrlsMail("http://dashboard.prod.hcom/" + (rjson \ "url").get)
+    case Failure(ex) => sendFailureMail(ex)
   }
 
-  val buffer =
-    Buf.ByteArray.Owned(createSnapshotJson(dashboardjson).getBytes())
+  def createAndSendSnapshotJson(dashboard: JsValue): Future[Response] = {
 
-  val createSnapShotRequest = RequestBuilder()
-    .url(s"http://$host:$port/api/snapshots/")
-    .build(Method.Post, Some(buffer))
+    val snapshotJson = Json.obj(
+      "dashboard" -> Json.obj(
+        "editable" -> false,
+        "hideControls" -> true,
+    "nav":[
+    {
+      "enable":false,
+      "type":"timepicker"
+    }
+    ],
+    "rows": [
+    {
 
-  val snapshotResponse = client(createSnapShotRequest).asScala
+    }
+    ],
+    "style":"dark",
+    "tags":[],
+    "templating":{
+      "list":[
+      ]
+    },
+    "time":{
+    },
+    "timezone":"browser",
+    "title":"Home",
+    "version":5
+  },
+  "expires": 3600
+      )
+    )
 
-  def createSnapshotJson(dashboard: JsValue): String = {}
+    val buffer = Buf.ByteArray.Owned(snapshotJson.getBytes())
+
+    val createSnapShotRequest = RequestBuilder()
+      .url(s"http://$host:$port/api/snapshots/")
+      .build(Method.Post, Some(buffer))
+
+    client(createSnapShotRequest).asScala
+  }
 
   def getDashboard(dashboard: String): Future[Response] = {
 
@@ -41,5 +78,11 @@ class Main extends App {
     client(getDashboardRequest).asScala
   }
 
-  def sendMail(msg: String): Future[Unit] = ???
+  def sendFailureMail(ex: Throwable): Future[Response] = ???
+  def sendUrlsMail(url: String): Future[Response] = ???
+}
+
+case class SnapshotBody(rows:) {
+
+  def toJsonString: String = ???
 }
