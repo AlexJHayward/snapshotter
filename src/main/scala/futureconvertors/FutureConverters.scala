@@ -1,8 +1,8 @@
 package futureconvertors
 
-import com.twitter.util.{Return, Throw, Future => TFuture}
+import com.twitter.util.{Return, Throw, Future ⇒ TFuture}
 
-import scala.concurrent.{Future, Promise => ScalaPromise}
+import scala.concurrent.{Future, Promise ⇒ ScalaPromise}
 
 object FutureConverters {
 
@@ -12,8 +12,8 @@ object FutureConverters {
 
       val scalaPromise = ScalaPromise[A]()
       twitterFuture.respond {
-        case Return(value)    => scalaPromise.success(value)
-        case Throw(exception) => scalaPromise.failure(exception)
+        case Return(value)    ⇒ scalaPromise.success(value)
+        case Throw(exception) ⇒ scalaPromise.failure(exception)
       }
       scalaPromise.future
     }
