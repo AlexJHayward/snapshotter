@@ -2,6 +2,8 @@
 
 Snapshot grafana dashboards programmatically and email the results to someone.
 
+Meant to be run as a cron job or something, with the idea of using grafana snapshots to document monthly average stats, this is a fairly specific usecase but it was useful to me and a nice bit of finagle/play-json practice.
+
 Written in scala with play-json, finagle and hopefully something that can send emails.
 
 ## application.conf
