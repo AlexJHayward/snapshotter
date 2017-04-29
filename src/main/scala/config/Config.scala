@@ -1,6 +1,6 @@
 package config
 
-trait Config extends GrafanaConfig {
+class Config extends GrafanaConfig {
 
   val headers: Map[String, String] = Map(
     "Accept"        → "application/json",
