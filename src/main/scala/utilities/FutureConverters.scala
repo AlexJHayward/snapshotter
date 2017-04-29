@@ -1,4 +1,4 @@
-package futureconvertors
+package utilities
 
 import com.twitter.util.{Return, Throw, Future ⇒ TFuture}
 

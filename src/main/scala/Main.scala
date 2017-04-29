@@ -1,16 +1,17 @@
 import com.twitter.finagle.Http
 import com.twitter.finagle.http._
 import com.twitter.io.Buf
-import futureconvertors.FutureConverters._
+import config.Config
 import json.Templates
 import play.api.libs.json._
+import utilities.FutureConverters._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
-object Main extends App with MainConfig with Templates {
+object Main extends App with Config with Templates {
 
   val service = Http.client.withTls(host).newService(s"$host:$port")
 
