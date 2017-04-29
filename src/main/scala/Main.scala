@@ -2,14 +2,15 @@ import com.twitter.finagle.Http
 import com.twitter.finagle.http._
 import com.twitter.io.Buf
 import futureconvertors.FutureConverters._
-import play.api.libs.json.{JsValue, Json}
+import json.Templates
+import play.api.libs.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success}
 
-object Main extends App with MainConfig {
+object Main extends App with MainConfig with Templates {
 
   val service = Http.client.withTls(host).newService(s"$host:$port")
 
@@ -35,35 +36,13 @@ object Main extends App with MainConfig {
 
   def createAndSendSnapshotJson(dashboard: JsValue): Future[Response] = {
 
-    val snapshotJson: String = Json.stringify(
-      Json.obj(
-        "dashboard" → Json.obj(
-          "editable"     → false,
-          "hideControls" → true,
-          "nav" → Json.arr(
-            Json.obj(
-              "enable" → false,
-              "type"   → "timepicker"
-            )
-          ),
-          "rows" → Json.arr(
-            (dashboard \ "dashboard" \ "rows").getOrElse(Json.obj())
-          ),
-          "style" → "dark",
-          "tags"  → (dashboard \ "dashboard" \ "tags").getOrElse(Json.arr()),
-          "templating" → Json.obj(
-            "list" → Json.arr()
-          ),
-          "time"     → Json.obj(),
-          "timezone" → "browser",
-          "title"    → "Home",
-          "version"  → (dashboard \ "dashboard" \ "version").getOrElse(Json.toJson(0))
-        ),
-        "expires" → 3600
-      )
+    val snapshot: String = snapshotJson(
+      (dashboard \ "dashboard" \ "rows").validate[JsObject],
+      (dashboard \ "dashboard" \ "tags").validate[JsArray],
+      (dashboard \ "dashboard" \ "version").validate[JsNumber]
     )
 
-    val buffer = Buf.ByteArray.Owned(snapshotJson.getBytes())
+    val buffer = Buf.ByteArray.Owned(snapshot.getBytes())
 
     val createSnapshotRequest = RequestBuilder()
       .url(s"http://$host:$port/api/snapshots/")
