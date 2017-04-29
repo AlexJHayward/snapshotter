@@ -37,11 +37,7 @@ object Main extends App with Config with Templates {
 
   def createAndSendSnapshotJson(dashboard: JsValue): Future[Response] = {
 
-    val snapshot: String = snapshotJson(
-      (dashboard \ "dashboard" \ "rows").validate[JsObject],
-      (dashboard \ "dashboard" \ "tags").validate[JsArray],
-      (dashboard \ "dashboard" \ "version").validate[JsNumber]
-    )
+    val snapshot: String = snapshotJson(dashboard)
 
     val buffer = Buf.ByteArray.Owned(snapshot.getBytes())
 

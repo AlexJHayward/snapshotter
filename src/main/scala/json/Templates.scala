@@ -2,23 +2,24 @@ package json
 
 import play.api.libs.json._
 
+import ImplicitReads._
+
 trait Templates {
 
-  //todo this is shit
+  def snapshotJson(dashboard: JsValue): String = {
 
-  private var rows: JsObject    = Json.obj()
-  private var tags: JsArray     = Json.arr()
-  private var version: JsNumber = JsNumber(0)
+    val valuesFromDashboard: JsResult[SnapShotValues] = dashboard.validate[SnapShotValues]
 
-  def snapshotJson(rowsResult: JsResult[JsObject],
-                   tagsResult: JsResult[JsArray],
-                   versionResult: JsResult[JsNumber]): String = {
-
-    if (rowsResult.isSuccess && tagsResult.isSuccess && versionResult.isSuccess) {
-      rows = rowsResult.get
-      tags = tagsResult.get
-      version = versionResult.get
-    }
+    val values = valuesFromDashboard.getOrElse(
+      SnapShotValues(
+        rows = Json.arr(),
+        tags = Json.arr(),
+        templateList = Json.arr(),
+        time = Json.obj("from" → "now-24h", "to" → "now"),
+        title = JsString("Title Not Given"),
+        version = JsNumber(0)
+      )
+    )
 
     Json.stringify(
       Json.obj(
@@ -31,18 +32,16 @@ trait Templates {
               "type"   → "timepicker"
             )
           ),
-          "rows" → Json.arr(
-            rows
-          ),
+          "rows"  → values.rows,
           "style" → "dark",
-          "tags"  → tags,
+          "tags"  → values.tags,
           "templating" → Json.obj(
-            "list" → Json.arr()
+            "list" → values.templateList
           ),
-          "time"     → Json.obj(),
+          "time"     → values.time,
           "timezone" → "browser",
-          "title"    → "Home",
-          "version"  → version
+          "title"    → values.title,
+          "version"  → values.version
         ),
         "expires" → 3600
       )
