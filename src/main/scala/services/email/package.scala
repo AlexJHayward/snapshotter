@@ -12,11 +12,6 @@ package object email {
   implicit def stringToSeq(single: String): Seq[String] = Seq(single)
   implicit def liftToOption[T](t: T): Option[T]         = Some(t)
 
-  sealed abstract class MailType
-  case object Plain     extends MailType
-  case object Rich      extends MailType
-  case object MultiPart extends MailType
-
   case class Mail(cc: Seq[String] = Seq.empty,
                   bcc: Seq[String] = Seq.empty,
                   subject: String,

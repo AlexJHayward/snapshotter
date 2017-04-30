@@ -6,6 +6,8 @@ Meant to be run as a cron job or something, with the idea of using grafana snaps
 
 Written in scala with play-json, finagle and hopefully something that can send emails.
 
+Shout out to [mariussoutier](https://github.com/mariussoutier) for the [scala email sending gist](https://gist.github.com/mariussoutier/3436111).
+
 ## application.conf
 
 Add the following to your `application.conf` file in `src/main/resources`, it's being manually added to the classpath by SBT right now because Typesafe config can't see it.
