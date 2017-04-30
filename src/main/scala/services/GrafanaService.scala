@@ -3,7 +3,7 @@ package services
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.{Method, RequestBuilder, Response}
 import com.twitter.io.Buf
-import config.Config
+import config.GrafanaConfig
 import json.Templates
 import play.api.libs.json.{JsValue, Json}
 import utilities.FutureConverters._
@@ -11,11 +11,12 @@ import utilities.FutureConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class GrafanaService(config: Config) extends Templates {
+class GrafanaService(config: GrafanaConfig) extends Templates {
 
-  private val host         = config.host
-  private val port         = config.port
-  private val headers      = config.headers
+  private val host    = config.grafanaHost
+  private val port    = config.grafanaPort
+  private val headers = config.grafanaHeaders
+
   private val dashboardUrl = s"https://$host/api/dashboards/db"
   private val snapshotUrl  = s"http://$host:$port/api/snapshots/"
 

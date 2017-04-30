@@ -15,4 +15,7 @@ project/boot/
 project/plugins/project/
 
 /.idea
+
+# project specific, these should be set up by the user, see README.md
 /src/main/resources/application.conf
+/src/main/resources/receiver_emails.txt

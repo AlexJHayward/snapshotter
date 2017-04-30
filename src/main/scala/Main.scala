@@ -1,4 +1,4 @@
-import config.Config
+import config.{EmailConfig, GrafanaConfig}
 import services.GrafanaService
 import services.email.EmailService
 
@@ -9,15 +9,19 @@ import scala.util.{Failure, Success}
 
 object Main extends App {
 
-  val config = new Config
-  val grafanaService = new GrafanaService(config)
-  val emailService = new EmailService(config)
+  val emailConfig   = new EmailConfig
+  val grafanaConfig = new GrafanaConfig
 
-  val eventualSnapshot = grafanaService.createSnapshotForDashboard("some-fake-dashboard")
+  val grafanaService = new GrafanaService(grafanaConfig)
+  val emailService   = new EmailService(emailConfig)
+
+  val dashboardName = grafanaConfig.grafanaDashboardName
+
+  val eventualSnapshot = grafanaService.createSnapshotForDashboard(dashboardName)
 
   eventualSnapshot onComplete {
-    case Success(rjson) ⇒ println(s"success $rjson")
-    case Failure(ex)    ⇒ println(s"failure $ex")
+    case Success(rjson) ⇒ emailService.sendMail(dashboardName, rjson)
+    case Failure(ex)    ⇒ emailService.sendMail(dashboardName, ex)
   }
 
   //todo would be grand not to have to do this, maybe inf is too long? ⌛
