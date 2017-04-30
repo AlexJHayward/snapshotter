@@ -1,5 +1,6 @@
 import config.Config
-import services.{EmailService, GrafanaService}
+import services.GrafanaService
+import services.email.EmailService
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -19,5 +20,7 @@ object Main extends App {
     case Failure(ex)    ⇒ println(s"failure $ex")
   }
 
-  Await.result(eventualSnapshot, Duration.Inf) //todo would be grand not to have to do this ⌛
+  //todo would be grand not to have to do this, maybe inf is too long? ⌛
+  Await.result(eventualSnapshot, Duration.Inf)
+  Thread.sleep(9999L)
 }

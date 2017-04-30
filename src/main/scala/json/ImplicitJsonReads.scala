@@ -3,7 +3,7 @@ package json
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-object ImplicitReads {
+trait ImplicitJsonReads {
 
   implicit val dashboardReads: Reads[SnapShotValues] = (
     (JsPath \ "dashboard" \ "rows").read[JsArray] and
@@ -12,5 +12,5 @@ object ImplicitReads {
       (JsPath \ "dashboard" \ "time").read[JsObject] and
       (JsPath \ "dashboard" \ "title").read[JsString] and
       (JsPath \ "meta" \ "version").read[JsNumber]
-    )(SnapShotValues.apply _)
+  )(SnapShotValues.apply _)
 }
